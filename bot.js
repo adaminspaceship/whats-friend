@@ -100,13 +100,6 @@ async function startBot() {
             }
         }
 
-        // Sometimes ignore messages (like a real person would)
-        const shouldIgnore = Math.random() < 0.15; // 15% chance to ignore
-        if (shouldIgnore) {
-            console.log("🤫 Ignoring message (being human-like)");
-            return;
-        }
-
         // Clear existing timer for this chat
         if (messageTimers.has(chatId)) {
             clearTimeout(messageTimers.get(chatId));
