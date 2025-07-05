@@ -238,42 +238,6 @@ Keep responses SHORT but CONVERSATIONAL. Ask questions. Show interest. Be a real
 
     // Function to randomly initiate conversations
     function startRandomConversations(sock) {
-        // Random conversation starters
-        const conversationStarters = [
-            "נו מה קורה",
-            "GTA tonight?",
-            "Sony?",
-            "יא הומו מה שלומך",
-            "Bad day today",
-            "Silicon Valley is waiting!!!",
-            "Sleeeeeep everybody",
-            "Where my hat?",
-            "Oppressor time",
-            "McDonald's anyone?",
-            "Jachnun tomorrow?",
-            "Thanks Trump -4%",
-            "נו נו נו",
-            "For the boys",
-            "Miami vibes",
-            "Startup idea!!!",
-            "Agam is tall",
-            "Rocco is good boy",
-            "166 shekels fine again",
-            "פתח",
-            "Tesla charging?",
-            "Carmiel weekend?",
-            "Lulu time",
-            "Green green green",
-            "The mystery",
-            "Logang for life",
-            "Best times",
-            "When?",
-            "21:30?",
-            "???",
-            ".",
-            "Bad!"
-        ];
-
         // Store chat IDs that have interacted (we'll need to track this)
         const activeChatIds = new Set();
 
@@ -285,26 +249,82 @@ Keep responses SHORT but CONVERSATIONAL. Ask questions. Show interest. Be a real
             }
         });
 
-        // Send random messages every 30 minutes to 3 hours
+        // Send random messages more frequently
         setInterval(async () => {
             if (!isReady || activeChatIds.size === 0) return;
 
-            // 20% chance to send a random message
-            if (Math.random() < 0.2) {
+            // 60% chance to send a random message
+            if (Math.random() < 0.6) {
                 const randomChatId = Array.from(activeChatIds)[Math.floor(Math.random() * activeChatIds.size)];
-                const randomMessage = conversationStarters[Math.floor(Math.random() * conversationStarters.length)];
                 
-                console.log(`🎲 Randomly starting conversation: "${randomMessage}"`);
-                
-                // Show typing indicator before sending random message
-                await sendTyping(randomChatId, 1000 + Math.random() * 3000);
-                
-                await sock.sendMessage(randomChatId, { text: randomMessage });
-                
-                // Add to conversation history
-                addToHistory(randomChatId, "Raju", randomMessage);
+                try {
+                    // Generate a random conversation starter using Gemini
+                    const model = "gemini-2.0-flash-lite";
+                    const config = { 
+                        responseMimeType: "text/plain", 
+                        maxOutputTokens: 30,
+                        systemInstruction: [
+                        {
+                            text: `You are Raju starting a random conversation with friends Adam and Gal. Generate ONE short conversation starter that sounds natural and spontaneous.
+
+Use these types of messages:
+- Ask about plans ("GTA tonight?", "Sony?", "When?")
+- Check what they're doing ("נו מה קורה", "What's up man")
+- Mention food/activities ("McDonald's?", "Jachnun tomorrow?")
+- Reference inside jokes ("Silicon Valley is waiting", "Sleeeeeep everybody")
+- Ask about girlfriends/life ("How's Agam?", "Noya good?")
+- Gaming references ("Oppressor time", "GTA VI when?")
+- Random observations ("Bad day", "Thanks Trump -4%")
+
+Mix Hebrew and English naturally. Keep it SHORT (1-5 words max). Sound like you're randomly texting a friend.`
+                        }
+                    ]};
+                    
+                    const contents = [
+                        {
+                            role: "user",
+                            parts: [
+                                {
+                                    text: "Generate a random conversation starter"
+                                },
+                            ],
+                        },
+                    ];
+
+                    const response = await ai.models.generateContentStream({
+                        model,
+                        config,
+                        contents,
+                    });
+
+                    let randomMessage = "";
+                    for await (const chunk of response) {
+                        if (chunk.text) randomMessage += chunk.text;
+                    }
+                    randomMessage = randomMessage.trim();
+                    
+                    console.log(`🎲 AI-generated random message: "${randomMessage}"`);
+                    
+                    // Show typing indicator before sending random message
+                    await sendTyping(randomChatId, 1000 + Math.random() * 3000);
+                    
+                    await sock.sendMessage(randomChatId, { text: randomMessage });
+                    
+                    // Add to conversation history
+                    addToHistory(randomChatId, "Raju", randomMessage);
+                    
+                } catch (err) {
+                    console.error("Error generating random message:", err);
+                    // Fallback to a simple message if AI fails
+                    const fallbackMessages = ["נו מה קורה", "GTA tonight?", "Sony?", "When?", "Bad day"];
+                    const fallbackMessage = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
+                    
+                    await sendTyping(randomChatId, 1000 + Math.random() * 3000);
+                    await sock.sendMessage(randomChatId, { text: fallbackMessage });
+                    addToHistory(randomChatId, "Raju", fallbackMessage);
+                }
             }
-        }, 30 * 60 * 1000 + Math.random() * 150 * 60 * 1000); // 30 minutes to 3 hours
+        }, 5 * 60 * 1000 + Math.random() * 15 * 60 * 1000); // 5 to 20 minutes
     }
 
     // Function to send typing indicator
