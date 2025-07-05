@@ -16,6 +16,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 // Store conversation history
 const conversationHistory = new Map(); // chatId -> array of messages
 const messageTimers = new Map(); // chatId -> timeout ID for debouncing
+const processingLock = new Map(); // chatId -> boolean to prevent double processing
 
 // Human-like behavior state
 const botState = {
@@ -258,6 +259,13 @@ async function startBot() {
         // Set new timer to wait for potential follow-up messages
         const timer = setTimeout(async () => {
             messageTimers.delete(chatId);
+            
+            // Check if already processing this chat
+            if (processingLock.get(chatId)) {
+                console.log(`⏳ Already processing ${chatId}, skipping...`);
+                return;
+            }
+            
             await processMessage(sock, chatId);
         }, 3000); // Wait 3 seconds for more messages
 
@@ -266,6 +274,9 @@ async function startBot() {
 
     // Function to process message with AI after debounce
     async function processMessage(sock, chatId) {
+        // Set processing lock
+        processingLock.set(chatId, true);
+        
         try {
             // Update last message time
             botState.lastMessageTime.set(chatId, Date.now());
@@ -317,6 +328,9 @@ async function startBot() {
             await sock.sendMessage(chatId, {
                 text: "❌ לא הצלחתי לקבל תשובה כרגע"
             });
+        } finally {
+            // Always release the lock
+            processingLock.delete(chatId);
         }
     }
 
