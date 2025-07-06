@@ -395,8 +395,8 @@ async function startBot() {
         const senderPhone = senderId.split('@')[0]; // Extract phone number
         
         // Check if sender is Adam or Gal (replace with their actual phone numbers)
-        const ADAM_PHONE = "972505566131"; // Replace with Adam's actual phone number
-        const GAL_PHONE = "972544476870";  // Replace with Gal's actual phone number
+        const ADAM_PHONE = "170128033472737"; // Replace with Adam's actual phone number
+        const GAL_PHONE = "264763309310001";  // Replace with Gal's actual phone number
         
         let senderName = "User";
         if (senderPhone === ADAM_PHONE) {
