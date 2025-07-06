@@ -1,10 +1,10 @@
-# WhatsApp Bot with Gemini AI
+# WhatsApp Bot with Grok AI
 
-A WhatsApp bot that responds using Google Gemini AI and sends images for specific triggers.
+A WhatsApp bot that responds using xAI Grok AI and sends images for specific triggers.
 
 ## Features
 
-- Responds to messages using Google Gemini AI
+- Responds to messages using xAI Grok AI
 - Sends images when "hello mate" is mentioned
 - Personality: Raju - the perfect third friend for Adam and Gal
 
@@ -12,9 +12,9 @@ A WhatsApp bot that responds using Google Gemini AI and sends images for specifi
 
 1. Clone this repository
 2. Install dependencies: `npm install`
-3. Create a `.env` file with your Gemini API key:
+3. Create a `.env` file with your xAI API key:
    ```
-   GEMINI_API_KEY=your_gemini_api_key_here
+   XAI_API_KEY=your_xai_api_key_here
    ```
 4. Add your `human.png` image to the root directory
 5. Run the bot: `npm start`
@@ -25,13 +25,13 @@ A WhatsApp bot that responds using Google Gemini AI and sends images for specifi
 ### Railway (Recommended)
 1. Push your code to GitHub
 2. Connect your GitHub repo to Railway
-3. Add your `GEMINI_API_KEY` environment variable
+3. Add your `XAI_API_KEY` environment variable
 4. Deploy!
 
 ### Environment Variables
-- `GEMINI_API_KEY`: Your Google Gemini API key
+- `XAI_API_KEY`: Your xAI API key
 
 ## Usage
 
 Send a message containing "hello mate" to receive the human.png image.
-The bot will respond to all other messages using Gemini AI with Raju's personality. 
+The bot will respond to all other messages using Grok AI with Raju's personality. 

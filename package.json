@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-bot",
   "version": "1.0.0",
-  "description": "WhatsApp bot with Gemini AI",
+  "description": "WhatsApp bot with Grok AI",
   "main": "bot.js",
   "type": "module",
   "scripts": {
@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "1.8.0",
     "@whiskeysockets/baileys": "^6.7.8",
     "baileys": "^6.7.18",
     "dotenv": "^16.4.5"

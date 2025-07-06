@@ -5,13 +5,9 @@ import {
 } from "baileys";
 
 import * as dotenv from "dotenv";
-import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 
 dotenv.config();
-
-// מפתח ChatGPT שלך
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // Store conversation history
 const conversationHistory = new Map(); // chatId -> array of messages
@@ -46,7 +42,7 @@ function updateBotState() {
     }
 }
 
-// Generate AI response based on context and bot state
+// Generate AI response using xAI Grok API
 async function generateAIResponse(chatId, conversationContext, messageType = 'reply', senderName = "User") {
     const now = new Date();
     const hour = now.getHours();
@@ -298,18 +294,31 @@ Make it feel like a natural late night message from a friend.`;
     }
 
     try {
-        const model = ai.getGenerativeModel({ model: 'gemini-pro' });
-        
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: systemPrompt }] }],
-            generationConfig: {
-                maxOutputTokens: 50,
-                temperature: 0.9,
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.XAI_API_KEY}`
             },
+            body: JSON.stringify({
+                model: 'grok-3-latest',
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemPrompt
+                    }
+                ],
+                max_tokens: 50,
+                temperature: 0.9
+            })
         });
 
-        const response = result.response;
-        const text = response.text();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.choices[0].message.content;
         
         return text.trim();
     } catch (error) {
@@ -415,7 +424,7 @@ async function startBot() {
                 
                 // Add bot response to history
                 addToHistory(chatId, "Raju", "Hello mate! 👋 [sent image]");
-                return; // Exit early, don't process with Gemini
+                return; // Exit early, don't process with Grok
             } catch (err) {
                 console.error("Error sending image:", err);
                 await sock.sendMessage(chatId, {
@@ -476,7 +485,7 @@ async function startBot() {
             await sendNaturalResponse(sock, chatId, reply);
             
         } catch (err) {
-            console.error("שגיאה בתשובת GPT:", err);
+            console.error("שגיאה בתשובת Grok:", err);
             await sock.sendMessage(chatId, {
                 text: "❌ לא הצלחתי לקבל תשובה כרגע"
             });
@@ -550,7 +559,7 @@ async function startBot() {
                     
                 } catch (err) {
                     console.error("Error generating random message:", err);
-                    // Fallback to a simple message if AI fails
+                    // Fallback to a simple message if Grok fails
                     const fallbackMessages = ["נו מה קורה", "GTA tonight?", "Sony?", "When?", "Bad day"];
                     const fallbackMessage = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
                     
@@ -680,7 +689,7 @@ async function startBot() {
         conversationHistory.set(chatId, history);
     }
 
-    // Function to get conversation context for Gemini
+    // Function to get conversation context for Grok
     function getConversationContext(chatId) {
         const history = conversationHistory.get(chatId) || [];
         if (history.length === 0) return "";
