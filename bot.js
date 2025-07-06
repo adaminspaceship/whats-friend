@@ -45,8 +45,6 @@ function updateBotState() {
 // Generate AI response using xAI Grok API
 async function generateAIResponse(chatId, conversationContext, messageType = 'reply', senderName = "User") {
     const now = new Date();
-    const hour = now.getHours();
-    const dayOfWeek = now.getDay();
     
     // Full Raju personality context for all prompts
     const basePersonality = `Raju - The Perfect Third Friend for Adam and Gal
@@ -195,28 +193,11 @@ Topics to Randomly Bring Up:
 
 Raju embodies their chaotic energy, understands every reference, and perpetuates their inside jokes while adding his own spin. He's simultaneously the most reliable and unreliable friend.
 
-CURRENT CONTEXT: the latest message was sent by ${senderName} you can reference his details if needed.
 `;
 
-    // Add mood context
-    let moodContext = '';
-    switch (botState.mood) {
-        case 'excited':
-            moodContext = 'You are feeling excited and energetic today! Use more exclamation marks and enthusiasm.';
-            break;
-        case 'tired':
-            moodContext = 'You are feeling a bit tired today. Keep responses shorter and more casual.';
-            break;
-        case 'stressed':
-            moodContext = 'You are feeling stressed today. Maybe complain about work or army stuff.';
-            break;
-        case 'happy':
-            moodContext = 'You are in a great mood today! Be extra positive and suggest fun activities.';
-            break;
-        default:
-            moodContext = 'You are in a normal mood today.';
-    }
-
+    // Create mood context
+    const moodContext = `Current mood: ${botState.mood}. ${botState.mood === 'excited' ? 'Be extra energetic and enthusiastic!' : botState.mood === 'tired' ? 'Be more laid back and casual.' : botState.mood === 'stressed' ? 'Be a bit more scattered and anxious.' : botState.mood === 'happy' ? 'Be upbeat and positive!' : 'Be your normal chaotic self.'}`;
+    
     // Create different prompts based on message type
     let systemPrompt = '';
     
@@ -230,66 +211,62 @@ You are responding to a message from ${senderName}. Look at the conversation his
 Remember: You know ${senderName} personally and all their details. Reference shared experiences and inside jokes when appropriate.
 
 Current conversation context:
-${conversationContext}
-
-Respond as Raju would, keeping it natural and conversational.`;
-    }
-    
-    // Add other message types with sender context...
-    else if (messageType === 'proactive') {
+${conversationContext}`;
+    } else if (messageType === 'proactive') {
         systemPrompt = `${basePersonality}
 
 ${moodContext}
 
-Generate a short, natural message to start a conversation with ${senderName}. This should feel like something Raju would randomly text. Keep it very short (1-2 sentences). Be original and creative - don't repeat the same topics.
+You are starting a random conversation with ${senderName}. Be spontaneous and natural - bring up something relevant to them, ask about their day, mention GTA, or reference inside jokes. Keep it short (1-2 sentences). Don't be repetitive.
 
-Consider:
-- Current time of day (${hour}:00)
-- What ${senderName} might be doing
-- Shared interests and experiences
-- Random thoughts Raju might have
+Remember: You know ${senderName} personally and all their details. Reference their specific interests and current situations.
 
-Make it feel spontaneous and natural.`;
-    }
-    
-    else if (messageType === 'checkin') {
+Recent conversation context:
+${conversationContext}`;
+    } else if (messageType === 'checkin') {
         systemPrompt = `${basePersonality}
 
 ${moodContext}
 
-Generate a casual check-in message for ${senderName}. It's been a while since you talked. Keep it short and natural - like "what's up?" but in Raju's style. Reference something specific to ${senderName} if appropriate.
+You haven't heard from ${senderName} in a while, so you're checking in on them. Be casual and friendly - ask what they're up to, if they're okay, or mention something you'd normally talk about. Keep it short and natural.
 
-Make it feel like a natural friend checking in.`;
-    }
-    
-    else if (messageType === 'morning') {
+Remember: You know ${senderName} personally and all their details.
+
+Recent conversation context:
+${conversationContext}`;
+    } else if (messageType === 'morning') {
         systemPrompt = `${basePersonality}
 
 ${moodContext}
 
-Generate a morning message for ${senderName}. It's morning time (${hour}:00). Keep it short and energetic. Maybe reference what ${senderName} might be doing in the morning or suggest plans.
+It's morning time (8-10 AM). Send a natural morning message to ${senderName}. Could be asking about their day, mentioning breakfast/jachnun, or just saying good morning in your chaotic way. Keep it short and appropriate for morning.
 
-Make it feel like a natural morning greeting from a friend.`;
-    }
-    
-    else if (messageType === 'evening') {
+Remember: You know ${senderName} personally and all their details.
+
+Recent conversation context:
+${conversationContext}`;
+    } else if (messageType === 'evening') {
         systemPrompt = `${basePersonality}
 
 ${moodContext}
 
-Generate an evening message for ${senderName}. It's evening time (${hour}:00). Keep it short and casual. Maybe suggest evening activities or ask about their day.
+It's evening time (7-9 PM). Send a natural evening message to ${senderName}. Perfect time to suggest GTA sessions, ask about their day, or just check in. This is prime gaming time! Keep it short and energetic.
 
-Make it feel like a natural evening message from a friend.`;
-    }
-    
-    else if (messageType === 'latenight') {
+Remember: You know ${senderName} personally and all their details.
+
+Recent conversation context:
+${conversationContext}`;
+    } else if (messageType === 'latenight') {
         systemPrompt = `${basePersonality}
 
 ${moodContext}
 
-Generate a late night message for ${senderName}. It's late (${hour}:00). Keep it short and match the late night vibe. Maybe suggest late night activities or just casual late night thoughts.
+It's late night (11 PM - 1 AM). Send a natural late night message to ${senderName}. Could be asking if they're still awake, mentioning you can't sleep, or suggesting late night activities. Keep it short and appropriate for late night vibes.
 
-Make it feel like a natural late night message from a friend.`;
+Remember: You know ${senderName} personally and all their details.
+
+Recent conversation context:
+${conversationContext}`;
     }
 
     try {
@@ -496,8 +473,8 @@ async function startBot() {
 
     // Function to send messages naturally (split into multiple messages)
     async function sendNaturalResponse(sock, chatId, text) {
-        // Split by sentences or natural breaks
-        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        // Split by sentences while preserving punctuation marks
+        const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
         
         // Sometimes send as one message, sometimes split
         const shouldSplit = sentences.length > 1 && Math.random() < 0.7;
@@ -543,22 +520,12 @@ async function startBot() {
                 const randomChatId = Array.from(activeChatIds)[Math.floor(Math.random() * activeChatIds.size)];
                 
                 try {
-                    // Generate AI conversation starter
-                    const randomMessage = await generateAIResponse(randomChatId, getConversationContext(randomChatId), 'proactive');
-                    
-                    console.log(`🎲 AI-generated random message: "${randomMessage}"`);
-                    
-                    // Show typing indicator before sending random message
-                    await sendTyping(randomChatId, 1000 + Math.random() * 3000);
-                    
-                    await sock.sendMessage(randomChatId, { text: randomMessage });
-                    
-                    // Add to conversation history
-                    addToHistory(randomChatId, "Raju", randomMessage);
+                    // Use the dedicated sendProactiveMessage function
+                    await sendProactiveMessage(sock, randomChatId);
                     
                 } catch (err) {
-                    console.error("Error generating random message:", err);
-                    // Fallback to a simple message if Grok fails
+                    console.error("Error sending proactive message:", err);
+                    // Fallback to a simple message if everything fails
                     const fallbackMessages = ["נו מה קורה", "GTA tonight?", "Sony?", "When?", "Bad day"];
                     const fallbackMessage = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
                     
@@ -583,15 +550,8 @@ async function startBot() {
                 // If no conversation for 6-12 hours, send check-in message
                 if (hours > 6 && hours < 12 && Math.random() < 0.3) {
                     try {
-                        const checkInMessage = await generateAIResponse(chatId, getConversationContext(chatId), 'checkin');
-                        console.log(`💭 Checking in on inactive chat: "${checkInMessage}"`);
-                        
-                        await sendTyping(chatId, 2000 + Math.random() * 3000);
-                        await sock.sendMessage(chatId, { text: checkInMessage });
-                        addToHistory(chatId, "Raju", checkInMessage);
-                        
-                        // Update last message time
-                        botState.lastMessageTime.set(chatId, Date.now());
+                        // Use the dedicated sendCheckInMessage function
+                        await sendCheckInMessage(sock, chatId);
                     } catch (err) {
                         console.error("Error sending check-in message:", err);
                     }
@@ -613,12 +573,8 @@ async function startBot() {
             if (hour >= 8 && hour <= 10 && Math.random() < 0.2) {
                 const randomChatId = activeChatIds[Math.floor(Math.random() * activeChatIds.length)];
                 try {
-                    const morningMessage = await generateAIResponse(randomChatId, getConversationContext(randomChatId), 'morning');
-                    console.log(`🌅 Morning message: "${morningMessage}"`);
-                    
-                    await sendTyping(randomChatId, 1000 + Math.random() * 2000);
-                    await sock.sendMessage(randomChatId, { text: morningMessage });
-                    addToHistory(randomChatId, "Raju", morningMessage);
+                    // Use the dedicated sendTimeBasedMessage function
+                    await sendTimeBasedMessage(sock, randomChatId, 'morning');
                 } catch (err) {
                     console.error("Error sending morning message:", err);
                 }
@@ -628,12 +584,8 @@ async function startBot() {
             if (hour >= 19 && hour <= 21 && Math.random() < 0.3) {
                 const randomChatId = activeChatIds[Math.floor(Math.random() * activeChatIds.length)];
                 try {
-                    const eveningMessage = await generateAIResponse(randomChatId, getConversationContext(randomChatId), 'evening');
-                    console.log(`🌆 Evening message: "${eveningMessage}"`);
-                    
-                    await sendTyping(randomChatId, 1000 + Math.random() * 2000);
-                    await sock.sendMessage(randomChatId, { text: eveningMessage });
-                    addToHistory(randomChatId, "Raju", eveningMessage);
+                    // Use the dedicated sendTimeBasedMessage function
+                    await sendTimeBasedMessage(sock, randomChatId, 'evening');
                 } catch (err) {
                     console.error("Error sending evening message:", err);
                 }
@@ -643,12 +595,8 @@ async function startBot() {
             if ((hour >= 23 || hour <= 1) && Math.random() < 0.15) {
                 const randomChatId = activeChatIds[Math.floor(Math.random() * activeChatIds.length)];
                 try {
-                    const lateNightMessage = await generateAIResponse(randomChatId, getConversationContext(randomChatId), 'latenight');
-                    console.log(`🌙 Late night message: "${lateNightMessage}"`);
-                    
-                    await sendTyping(randomChatId, 1000 + Math.random() * 2000);
-                    await sock.sendMessage(randomChatId, { text: lateNightMessage });
-                    addToHistory(randomChatId, "Raju", lateNightMessage);
+                    // Use the dedicated sendTimeBasedMessage function
+                    await sendTimeBasedMessage(sock, randomChatId, 'latenight');
                 } catch (err) {
                     console.error("Error sending late night message:", err);
                 }
@@ -704,7 +652,7 @@ async function startBot() {
     async function sendProactiveMessage(sock, chatId) {
         try {
             // Get the last message from history to determine who we're talking to
-            const history = botState.conversationHistory.get(chatId) || [];
+            const history = conversationHistory.get(chatId) || [];
             let senderName = "User"; // Default
             
             // Find the most recent message from a user (not from Raju)
@@ -712,10 +660,10 @@ async function startBot() {
                 if (history[i].sender !== "Raju") {
                     // Try to match phone number to name
                     const lastSender = history[i].sender;
-                    if (lastSender.includes("972525555555")) { // Replace with Adam's actual number
+                    if (lastSender === "Adam") {
                         senderName = "Adam";
                         break;
-                    } else if (lastSender.includes("972525555556")) { // Replace with Gal's actual number
+                    } else if (lastSender === "Gal") {
                         senderName = "Gal";
                         break;
                     }
@@ -734,6 +682,8 @@ async function startBot() {
             const conversationContext = getConversationContext(chatId);
             const message = await generateAIResponse(chatId, conversationContext, 'proactive', senderName);
             
+            console.log(`🎲 Proactive message to ${senderName}: "${message}"`);
+            
             // Add to conversation history
             addToHistory(chatId, "Raju", message);
             
@@ -749,7 +699,7 @@ async function startBot() {
     async function sendCheckInMessage(sock, chatId) {
         try {
             // Get the last message from history to determine who we're talking to
-            const history = botState.conversationHistory.get(chatId) || [];
+            const history = conversationHistory.get(chatId) || [];
             let senderName = "User"; // Default
             
             // Find the most recent message from a user (not from Raju)
@@ -757,10 +707,10 @@ async function startBot() {
                 if (history[i].sender !== "Raju") {
                     // Try to match phone number to name
                     const lastSender = history[i].sender;
-                    if (lastSender.includes("972525555555")) { // Replace with Adam's actual number
+                    if (lastSender === "Adam") {
                         senderName = "Adam";
                         break;
-                    } else if (lastSender.includes("972525555556")) { // Replace with Gal's actual number
+                    } else if (lastSender === "Gal") {
                         senderName = "Gal";
                         break;
                     }
@@ -779,11 +729,16 @@ async function startBot() {
             const conversationContext = getConversationContext(chatId);
             const message = await generateAIResponse(chatId, conversationContext, 'checkin', senderName);
             
+            console.log(`💭 Check-in message to ${senderName}: "${message}"`);
+            
             // Add to conversation history
             addToHistory(chatId, "Raju", message);
             
             // Send the message
             await sendNaturalResponse(sock, chatId, message);
+            
+            // Update last message time
+            botState.lastMessageTime.set(chatId, Date.now());
             
         } catch (error) {
             console.error('Error sending check-in message:', error);
@@ -794,7 +749,7 @@ async function startBot() {
     async function sendTimeBasedMessage(sock, chatId, messageType) {
         try {
             // Get the last message from history to determine who we're talking to
-            const history = botState.conversationHistory.get(chatId) || [];
+            const history = conversationHistory.get(chatId) || [];
             let senderName = "User"; // Default
             
             // Find the most recent message from a user (not from Raju)
@@ -802,10 +757,10 @@ async function startBot() {
                 if (history[i].sender !== "Raju") {
                     // Try to match phone number to name
                     const lastSender = history[i].sender;
-                    if (lastSender.includes("972525555555")) { // Replace with Adam's actual number
+                    if (lastSender === "Adam") {
                         senderName = "Adam";
                         break;
-                    } else if (lastSender.includes("972525555556")) { // Replace with Gal's actual number
+                    } else if (lastSender === "Gal") {
                         senderName = "Gal";
                         break;
                     }
@@ -823,6 +778,9 @@ async function startBot() {
             // Generate time-based message with sender context
             const conversationContext = getConversationContext(chatId);
             const message = await generateAIResponse(chatId, conversationContext, messageType, senderName);
+            
+            const timeEmoji = messageType === 'morning' ? '🌅' : messageType === 'evening' ? '🌆' : '🌙';
+            console.log(`${timeEmoji} ${messageType} message to ${senderName}: "${message}"`);
             
             // Add to conversation history
             addToHistory(chatId, "Raju", message);
