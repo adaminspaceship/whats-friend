@@ -434,7 +434,7 @@ export class WhatsAppBot {
     }
   }
 
-  public updateStats(chatId: string, senderName: string): void {
+  public updateStats(_chatId: string, senderName: string): void {
     this.stats.totalMessages++;
     this.stats.messagesByUser[senderName] = (this.stats.messagesByUser[senderName] || 0) + 1;
     this.stats.lastActivity = new Date().toISOString();

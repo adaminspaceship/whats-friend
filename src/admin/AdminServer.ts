@@ -83,7 +83,7 @@ export class AdminServer {
 
   private setupRoutes(): void {
     // Health check endpoint for Railway
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/health', (_req: Request, res: Response) => {
       res.json({ 
         status: 'healthy', 
         timestamp: new Date().toISOString(),
@@ -93,17 +93,17 @@ export class AdminServer {
     });
 
     // Serve the admin interface
-    this.app.get('/', (req: Request, res: Response) => {
+    this.app.get('/', (_req: Request, res: Response) => {
       res.sendFile(path.join(__dirname, '../../admin/public/index.html'));
     });
 
     // API endpoints
-    this.app.get('/api/stats', (req: Request, res: Response) => {
+    this.app.get('/api/stats', (_req: Request, res: Response) => {
       this.updateStats();
       res.json(this.stats);
     });
 
-    this.app.get('/api/config', (req: Request, res: Response) => {
+    this.app.get('/api/config', (_req: Request, res: Response) => {
       res.json(this.config.getConfig());
     });
 
@@ -150,7 +150,7 @@ export class AdminServer {
       }
     });
 
-    this.app.get('/api/logs', (req: Request, res: Response) => {
+    this.app.get('/api/logs', (_req: Request, res: Response) => {
       // Return recent logs (we'll implement log storage)
       res.json({ logs: [] });
     });
