@@ -1,0 +1,72 @@
+{
+  "ai": {
+    "provider": "grok",
+    "model": "grok-3-latest",
+    "maxTokens": 200,
+    "temperature": 0.9
+  },
+  "bot": {
+    "name": "Raju",
+    "conversationHistoryLimit": 20,
+    "messageDebounceTime": 3000,
+    "reconnectDelay": 5000
+  },
+  "behaviors": {
+    "proactive": {
+      "enabled": true,
+      "frequency": {
+        "min": 30,
+        "max": 60
+      },
+      "chance": 0.3
+    },
+    "checkin": {
+      "enabled": true,
+      "inactivityThreshold": {
+        "min": 6,
+        "max": 12
+      },
+      "chance": 0.3
+    },
+    "timeBasedMessages": {
+      "enabled": true,
+      "morning": {
+        "start": 8,
+        "end": 10,
+        "chance": 0.2
+      },
+      "evening": {
+        "start": 19,
+        "end": 21,
+        "chance": 0.3
+      },
+      "latenight": {
+        "start": 23,
+        "end": 1,
+        "chance": 0.15
+      }
+    }
+  },
+  "personality": {
+    "moods": ["normal", "excited", "tired", "stressed", "happy"],
+    "moodChangeInterval": {
+      "min": 2,
+      "max": 4
+    },
+    "workingHours": {
+      "days": [0, 1, 2, 3, 4],
+      "start": 9,
+      "end": 17
+    }
+  },
+  "users": {
+    "170128033472737": {
+      "name": "Adam",
+      "personalityFile": "adam.txt"
+    },
+    "264763309310001": {
+      "name": "Gal",
+      "personalityFile": "gal.txt"
+    }
+  }
+} 

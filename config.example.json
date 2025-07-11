@@ -1,0 +1,118 @@
+{
+  "_comment": "Example configuration file - copy to config.json and customize",
+  
+  "ai": {
+    "_comment": "AI provider configuration",
+    "provider": "grok",
+    "model": "grok-3-latest",
+    "maxTokens": 50,
+    "temperature": 0.9
+  },
+  
+  "bot": {
+    "_comment": "Core bot settings",
+    "name": "Raju",
+    "conversationHistoryLimit": 20,
+    "messageDebounceTime": 3000,
+    "reconnectDelay": 5000
+  },
+  
+  "behaviors": {
+    "_comment": "Behavioral settings for proactive features",
+    
+    "proactive": {
+      "_comment": "Random conversation starter",
+      "enabled": true,
+      "frequency": {
+        "_comment": "Minutes between potential messages",
+        "min": 30,
+        "max": 60
+      },
+      "chance": 0.3
+    },
+    
+    "checkin": {
+      "_comment": "Check-in messages for inactive users",
+      "enabled": true,
+      "inactivityThreshold": {
+        "_comment": "Hours of inactivity before check-in",
+        "min": 6,
+        "max": 12
+      },
+      "chance": 0.3
+    },
+    
+    "timeBasedMessages": {
+      "_comment": "Time-based proactive messages",
+      "enabled": true,
+      "morning": {
+        "_comment": "Morning messages (24-hour format)",
+        "start": 8,
+        "end": 10,
+        "chance": 0.2
+      },
+      "evening": {
+        "_comment": "Evening messages (24-hour format)",
+        "start": 19,
+        "end": 21,
+        "chance": 0.3
+      },
+      "latenight": {
+        "_comment": "Late night messages (24-hour format)",
+        "start": 23,
+        "end": 1,
+        "chance": 0.15
+      }
+    }
+  },
+  
+  "personality": {
+    "_comment": "Personality and mood settings",
+    "moods": ["normal", "excited", "tired", "stressed", "happy"],
+    "moodChangeInterval": {
+      "_comment": "Hours between mood changes",
+      "min": 2,
+      "max": 4
+    },
+    "workingHours": {
+      "_comment": "Working hours affect response timing (0=Sunday, 6=Saturday)",
+      "days": [0, 1, 2, 3, 4],
+      "start": 9,
+      "end": 17
+    }
+  },
+  
+  "users": {
+    "_comment": "User-specific configurations - replace with actual phone numbers",
+    "1234567890": {
+      "_comment": "Example user configuration",
+      "name": "ExampleUser",
+      "personalityFile": "example.txt"
+    },
+    "0987654321": {
+      "name": "AnotherUser", 
+      "personalityFile": "another.txt"
+    }
+  },
+  
+  "features": {
+    "_comment": "Feature flags for easy enabling/disabling",
+    "imageResponses": true,
+    "voiceMessages": false,
+    "groupChatSupport": false,
+    "analyticsTracking": false
+  },
+  
+  "advanced": {
+    "_comment": "Advanced settings - modify with caution",
+    "maxConcurrentChats": 10,
+    "rateLimiting": {
+      "enabled": true,
+      "messagesPerMinute": 5
+    },
+    "logging": {
+      "level": "info",
+      "saveToFile": false
+    }
+  }
+} 
